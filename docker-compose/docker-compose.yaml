@@ -52,7 +52,10 @@ services:
       AZURE_WASB_ACCESS_KEY: ""
       HIVE_METASTORE_USERS_IN_ADMIN_ROLE: "admin"
     depends_on:
-      - postgresdb
+      postgresdb:
+        condition: service_healthy
+    networks:
+      - trino_network_tutorial
 
   trino-coordinator:
     image: 'trinodb/trino:400' # As per tutorial
