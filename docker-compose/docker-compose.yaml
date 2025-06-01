@@ -20,49 +20,39 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+  
   hive-metastore:
-    image: 'starburstdata/hive:3.1.2-e.18' # As per tutorial
     hostname: hive-metastore
-    container_name: tutorial_hive_metastore # Added for clarity
+    image: 'starburstdata/hive:3.1.2-e.18'
     ports:
-      - '9083:9083'
-    restart: always
+      - '9083:9083' # Metastore Thrift
     environment:
       HIVE_METASTORE_DRIVER: org.postgresql.Driver
-      HIVE_METASTORE_JDBC_URL: jdbc:postgresql://metastore_db:5432/metastore # Uses service name
+      HIVE_METASTORE_JDBC_URL: jdbc:postgresql://metastore_db:5432/metastore
       HIVE_METASTORE_USER: hive
       HIVE_METASTORE_PASSWORD: hive
-      # HIVE_METASTORE_WAREHOUSE_DIR: s3a://spark-delta-lake/ # Points to a bucket in MinIO
-      # This warehouse dir needs to be adjusted to a bucket we create in our MinIO service
-      HIVE_METASTORE_WAREHOUSE_DIR: s3a://trino-data/ # Example: new bucket for this setup
-      
-      # Configure to use the MinIO service within this docker-compose
-      S3_ENDPOINT: http://minio:9000 # Use service name 'minio'
-      S3_ACCESS_KEY: minioadmin # Use consistent MinIO credentials
-      S3_SECRET_KEY: minioadmin # Use consistent MinIO credentials
+      HIVE_METASTORE_WAREHOUSE_DIR: s3://trino-data/
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
       S3_PATH_STYLE_ACCESS: "true"
-      REGION: "" # Correct for MinIO
-      HIVE_METASTORE_USERS_IN_ADMIN_ROLE: "admin" # Or "hive", "trino"
-      # Add these for S3A client within Hive Metastore, as per our previous findings
-      # Ensure the starburstdata/hive image's entrypoint respects these or HADOOP_OPTS for S3A
-      # Alternatively, these might need to be set via a core-site.xml mounted if the image supports it
-      # For starburstdata/hive, it often picks up S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY directly
-      # for its internal S3A client used with HIVE_METASTORE_WAREHOUSE_DIR.
-      # Let's assume it does. If not, we might need SERVICE_OPTS or to mount core-site.xml for HMS too.
-    healthcheck:
-      # The tutorial's healthcheck is good if bash is available
-      test: ["CMD-SHELL", "exec 6<> /dev/tcp/localhost/9083 || exit 1"] # Changed from bash -c "..." to CMD-SHELL
-      interval: 15s
-      timeout: 5s
-      retries: 10
-      start_period: 90s
+      REGION: ""
+      GOOGLE_CLOUD_KEY_FILE_PATH: ""
+      AZURE_ADL_CLIENT_ID: ""
+      AZURE_ADL_CREDENTIAL: ""
+      AZURE_ADL_REFRESH_URL: ""
+      AZURE_ABFS_STORAGE_ACCOUNT: ""
+      AZURE_ABFS_ACCESS_KEY: ""
+      AZURE_WASB_STORAGE_ACCOUNT: ""
+      AZURE_ABFS_OAUTH: ""
+      AZURE_ABFS_OAUTH_TOKEN_PROVIDER: ""
+      AZURE_ABFS_OAUTH_CLIENT_ID: ""
+      AZURE_ABFS_OAUTH_SECRET: ""
+      AZURE_ABFS_OAUTH_ENDPOINT: ""
+      AZURE_WASB_ACCESS_KEY: ""
+      HIVE_METASTORE_USERS_IN_ADMIN_ROLE: "admin"
     depends_on:
-      postgresdb:
-        condition: service_healthy
-      minio: # Hive Metastore should wait for MinIO if its warehouse is on S3
-        condition: service_healthy
-    networks:
-      - trino_network_tutorial
+      - postgresdb
 
   trino-coordinator:
     image: 'trinodb/trino:400' # As per tutorial
