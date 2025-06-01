@@ -72,8 +72,7 @@ services:
       - ./trino-files-tutorial/etc:/etc/trino
     depends_on: # Trino depends on Hive Metastore
       hive-metastore
-      minio: # Trino also depends on MinIO
-        condition: service_healthy
+      minio
     networks:
       - trino_network_tutorial
     # Add extra_hosts for host.docker.internal if any config still uses it,
