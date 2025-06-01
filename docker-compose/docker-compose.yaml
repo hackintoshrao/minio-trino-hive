@@ -71,8 +71,7 @@ services:
       # where config.properties, node.properties, jvm.config, and catalog/ (for hive.properties, delta.properties) reside.
       - ./trino-files-tutorial/etc:/etc/trino
     depends_on: # Trino depends on Hive Metastore
-      hive-metastore:
-        condition: service_healthy # Wait for HMS healthcheck to pass
+      hive-metastore
       minio: # Trino also depends on MinIO
         condition: service_healthy
     networks:
