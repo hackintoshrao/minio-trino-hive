@@ -4,17 +4,22 @@ services:
   postgresdb:
     image: postgres:13 # Using postgres:13 like in our previous setup
     hostname: metastore_db
-    container_name: tutorial_postgres # Added for clarity
+    container_name: tutorial_postgres 
     restart: always
     environment:
-      POSTGRES_USER: hive # From tutorial
-      POSTGRES_PASSWORD: hive # From tutorial
-      POSTGRES_DB: metastore # From tutorial
+      POSTGRES_USER: hive 
+      POSTGRES_PASSWORD: hive 
+      POSTGRES_DB: metastore 
     volumes:
       - postgres_data_tutorial:/var/lib/postgresql/data # Use a named volume
     networks:
       - trino_network_tutorial # Use a custom network
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hive -d metastore || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
   hive-metastore:
     image: 'starburstdata/hive:3.1.2-e.18' # As per tutorial
     hostname: hive-metastore
