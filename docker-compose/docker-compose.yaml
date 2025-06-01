@@ -71,18 +71,18 @@ services:
       # where config.properties, node.properties, jvm.config, and catalog/ (for hive.properties, delta.properties) reside.
       - ./trino-files-tutorial/etc:/etc/trino
     depends_on: # Trino depends on Hive Metastore
-      hive-metastore
-      minio
+      - hive-metastore
+      - minio
     networks:
       - trino_network_tutorial
     # Add extra_hosts for host.docker.internal if any config still uses it,
     # but best to use service names like 'minio' and 'hive-metastore'.
     # For this tutorial, direct service name resolution is better.
 
-  minio: # Added MinIO service
+  minio: 
     image: minio/minio:latest
     hostname: minio
-    container_name: tutorial_minio # Added for clarity
+    container_name: tutorial_minio 
     ports:
       - "9000:9000" # API port
       - "9001:9001" # Console port
